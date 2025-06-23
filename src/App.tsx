@@ -2,13 +2,20 @@ import Search from "./components/Search.tsx";
 import {useEffect, useState} from "react";
 import Spinner from "./components/Spinner.tsx";
 import MovieCard from "./components/MovieCard.tsx";
+import {useDebounce} from "react-use";
 
 const App = () => {
 
     const [searchTerm, setSearchTerm] = useState('');
+    const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('')
+
     const [errorMessage, setErrorMessage] = useState('')
     const [movieList, setMovieList] = useState([])
     const [isLoading, setIsLoading] = useState(false)
+
+    useDebounce(function (){
+        setDebouncedSearchTerm(searchTerm)
+    }, 500, [searchTerm])
 
     async function fetchMovies(query: string) {
         try {
@@ -41,7 +48,7 @@ const App = () => {
             });
         }, 200)
 
-    }, [searchTerm])
+    }, [debouncedSearchTerm])
 
     return (
         <main>
