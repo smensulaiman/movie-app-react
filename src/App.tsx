@@ -10,7 +10,7 @@ const App = () => {
     const [movieList, setMovieList] = useState([])
     const [isLoading, setIsLoading] = useState(false)
 
-    async function fetchMovies() {
+    async function fetchMovies(query: string) {
         try {
             const API_BASE_URL = "http://api.themoviedb.org/3";
             const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
@@ -23,7 +23,7 @@ const App = () => {
                 })
             }
 
-            return await fetch(`${API_BASE_URL}/discover/movie?sort_by=popularity.desc`, API_OPTIONS)
+            return await fetch(`${API_BASE_URL}/${query ? 'search' : 'discover'}/movie?sort_by=popularity.desc${query ? `&query=${encodeURIComponent(query)}`: ''}`, API_OPTIONS)
                 .then((response) => response.json());
         } catch (error) {
             setIsLoading(false)
@@ -35,17 +35,13 @@ const App = () => {
     useEffect(function () {
         setIsLoading(true)
         setTimeout(function () {
-            fetchMovies().then(function (moviesJson) {
+            fetchMovies(searchTerm).then(function (moviesJson) {
                 setIsLoading(false)
                 setMovieList(moviesJson.results || []);
-
-                movieList.map((movie) => {
-                    return movie.id
-                });
             });
-        }, 700)
+        }, 200)
 
-    }, [])
+    }, [searchTerm])
 
     return (
         <main>
@@ -68,7 +64,7 @@ const App = () => {
                         <p className="bg-red-50 p-2 text-red-500 rounded-xl">{errorMessage}</p>
                     ) : (
                         <ul>
-                            { movieList && movieList.filter(item => item.title.toLowerCase().includes(searchTerm.toLowerCase())).map(function (movie){
+                            { movieList && movieList.map(function (movie){
                                 return <li key={movie.id}>
                                     <MovieCard movie={movie}/>
                                 </li>
